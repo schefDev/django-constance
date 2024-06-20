@@ -19,7 +19,7 @@ def _migrate_from_old_table(apps, schema_editor) -> None:
             cursor.execute(f'INSERT INTO constance_constance ( {quoted_string} ) SELECT {quoted_string} FROM constance_config', [])
             cursor.execute('DROP TABLE constance_config', [])
     except DatabaseError as exc:
-        logger.warning('copy data from old constance table to a new one failed: %s', exc)
+        logger.debug('copy data from old constance table to a new one failed: %s', exc)
 
     Constance = apps.get_model('constance', 'Constance')
     sequence_sql = connection.ops.sequence_reset_sql(no_style(), [Constance])
