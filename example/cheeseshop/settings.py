@@ -79,7 +79,6 @@ WSGI_APPLICATION = 'cheeseshop.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        #'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
         'NAME': '/tmp/cheeseshop.db',
     }
 }
@@ -93,10 +92,7 @@ CONSTANCE_REDIS_CONNECTION = {
 CONSTANCE_ADDITIONAL_FIELDS = {
     'yes_no_null_select': [
         'django.forms.fields.ChoiceField',
-        {
-            'widget': 'django.forms.Select',
-            'choices': ((None, "-----"), ("yes", "Yes"), ("no", "No"))
-        }
+        {'widget': 'django.forms.Select', 'choices': ((None, '-----'), ('yes', 'Yes'), ('no', 'No'))},
     ],
     'email': ('django.forms.fields.EmailField',),
     'json_field': ['cheeseshop.fields.JsonField'],

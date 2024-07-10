@@ -1,10 +1,13 @@
 from collections import OrderedDict
-from datetime import date, datetime
+from datetime import date
+from datetime import datetime
 from operator import itemgetter
 
-from django import forms, get_version
+from django import forms
+from django import get_version
 from django.apps import apps
-from django.contrib import admin, messages
+from django.contrib import admin
+from django.contrib import messages
 from django.contrib.admin.options import csrf_protect_m
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseRedirect
@@ -13,7 +16,8 @@ from django.urls import path
 from django.utils.formats import localize
 from django.utils.translation import gettext_lazy as _
 
-from . import LazyConfig, settings
+from . import LazyConfig
+from . import settings
 from .forms import ConstanceForm
 from .utils import get_values
 
@@ -29,14 +33,10 @@ class ConstanceAdmin(admin.ModelAdmin):
         super().__init__(model, admin_site)
 
     def get_urls(self):
-        info = self.model._meta.app_label, self.model._meta.module_name
+        info = f'{self.model._meta.app_label}_{self.model._meta.module_name}'
         return [
-            path('',
-                self.admin_site.admin_view(self.changelist_view),
-                name='%s_%s_changelist' % info),
-            path('',
-                self.admin_site.admin_view(self.changelist_view),
-                name='%s_%s_add' % info),
+            path('', self.admin_site.admin_view(self.changelist_view), name=f'{info}_changelist'),
+            path('', self.admin_site.admin_view(self.changelist_view), name=f'{info}_add'),
         ]
 
     def get_config_value(self, name, options, form, initial):
@@ -73,9 +73,7 @@ class ConstanceAdmin(admin.ModelAdmin):
         return config_value
 
     def get_changelist_form(self, request):
-        """
-        Returns a Form class for use in the changelist_view.
-        """
+        """Returns a Form class for use in the changelist_view."""
         # Defaults to self.change_list_form in order to preserve backward
         # compatibility
         return self.change_list_form
@@ -88,23 +86,12 @@ class ConstanceAdmin(admin.ModelAdmin):
         form_cls = self.get_changelist_form(request)
         form = form_cls(initial=initial, request=request)
         if request.method == 'POST' and request.user.has_perm('constance.change_config'):
-            form = form_cls(
-                data=request.POST, files=request.FILES, initial=initial, request=request
-            )
+            form = form_cls(data=request.POST, files=request.FILES, initial=initial, request=request)
             if form.is_valid():
                 form.save()
-                messages.add_message(
-                    request,
-                    messages.SUCCESS,
-                    _('Live settings updated successfully.'),
-                )
+                messages.add_message(request, messages.SUCCESS, _('Live settings updated successfully.'))
                 return HttpResponseRedirect('.')
-            else:
-                messages.add_message(
-                    request,
-                    messages.ERROR,
-                    _('Failed to update live settings.'),
-                )
+            messages.add_message(request, messages.ERROR, _('Failed to update live settings.'))
         context = dict(
             self.admin_site.each_context(request),
             config_values=[],
@@ -117,9 +104,7 @@ class ConstanceAdmin(admin.ModelAdmin):
             django_version=get_version(),
         )
         for name, options in settings.CONFIG.items():
-            context['config_values'].append(
-                self.get_config_value(name, options, form, initial)
-            )
+            context['config_values'].append(self.get_config_value(name, options, form, initial))
 
         if settings.CONFIG_FIELDSETS:
             if isinstance(settings.CONFIG_FIELDSETS, dict):
@@ -129,31 +114,28 @@ class ConstanceAdmin(admin.ModelAdmin):
 
             context['fieldsets'] = []
             for fieldset_title, fieldset_data in fieldset_items:
-                if type(fieldset_data) == dict:
+                if isinstance(fieldset_data, dict):
                     fields_list = fieldset_data['fields']
                     collapse = fieldset_data.get('collapse', False)
                 else:
                     fields_list = fieldset_data
                     collapse = False
 
-                absent_fields = [field for field in fields_list
-                                 if field not in settings.CONFIG]
-                assert not any(absent_fields), (
-                    "CONSTANCE_CONFIG_FIELDSETS contains field(s) that does "
-                    "not exist: %s" % ', '.join(absent_fields))
+                absent_fields = [field for field in fields_list if field not in settings.CONFIG]
+                if any(absent_fields):
+                    raise ValueError(
+                        'CONSTANCE_CONFIG_FIELDSETS contains field(s) that does not exist(s): {}'.format(
+                            ', '.join(absent_fields)
+                        )
+                    )
 
                 config_values = []
 
                 for name in fields_list:
                     options = settings.CONFIG.get(name)
                     if options:
-                        config_values.append(
-                            self.get_config_value(name, options, form, initial)
-                        )
-                fieldset_context = {
-                    'title': fieldset_title,
-                    'config_values': config_values
-                }
+                        config_values.append(self.get_config_value(name, options, form, initial))
+                fieldset_context = {'title': fieldset_title, 'config_values': config_values}
 
                 if collapse:
                     fieldset_context['collapse'] = True
@@ -192,7 +174,7 @@ class Config:
             return False
 
         def get_change_permission(self):
-            return 'change_%s' % self.model_name
+            return f'change_{self.model_name}'
 
         @property
         def app_config(self):

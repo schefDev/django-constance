@@ -1,5 +1,7 @@
 import json
-from django.forms import fields, widgets
+
+from django.forms import fields
+from django.forms import widgets
 
 
 class JsonField(fields.CharField):
@@ -17,8 +19,7 @@ class JsonField(fields.CharField):
     def to_python(self, value):
         if value:
             return json.loads(value)
-        else:
-            return {}
+        return {}
 
     def prepare_value(self, value):
         return json.dumps(value)

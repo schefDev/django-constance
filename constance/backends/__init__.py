@@ -1,10 +1,7 @@
-"""
-Defines the base constance backend
-"""
+"""Defines the base constance backend."""
 
 
 class Backend:
-
     def get(self, key):
         """
         Get the key from the backend store and return the value.
@@ -20,7 +17,5 @@ class Backend:
         raise NotImplementedError
 
     def set(self, key, value):
-        """
-        Add the value to the backend store given the key.
-        """
+        """Add the value to the backend store given the key."""
         raise NotImplementedError

@@ -1,4 +1,7 @@
-from datetime import datetime, date, time, timedelta
+from datetime import date
+from datetime import datetime
+from datetime import time
+from datetime import timedelta
 from decimal import Decimal
 
 from constance import settings
@@ -6,7 +9,6 @@ from constance.base import Config
 
 
 class StorageTestsMixin:
-
     def setUp(self):
         self.config = Config()
         super().setUp()
@@ -51,15 +53,10 @@ class StorageTestsMixin:
         self.assertEqual(self.config.EMAIL_VALUE, 'foo@bar.com')
 
     def test_nonexistent(self):
-        try:
-            self.config.NON_EXISTENT
-        except Exception as e:
-            self.assertEqual(type(e), AttributeError)
+        self.assertRaises(AttributeError, getattr, self.config, 'NON_EXISTENT')
 
-        try:
+        with self.assertRaises(AttributeError):
             self.config.NON_EXISTENT = 1
-        except Exception as e:
-            self.assertEqual(type(e), AttributeError)
 
     def test_missing_values(self):
         # set some values and leave out others

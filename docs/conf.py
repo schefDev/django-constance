@@ -3,9 +3,20 @@
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
-import sys
 import os
+import re
+import sys
 from datetime import datetime
+
+
+def get_version():
+    with open('../pyproject.toml') as f:
+        for line in f:
+            match = re.match(r'version = "(.*)"', line)
+            if match:
+                return match.group(1)
+    return '0.0.0'
+
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'tests.settings')
 
@@ -20,17 +31,11 @@ sys.path.insert(0, os.path.abspath('..'))
 
 project = 'django-constance'
 project_copyright = datetime.now().year.__str__() + ', Jazzband'
-# author = ''
 
-# Use current version.
-try:
-    from constance import __version__
-    # The short X.Y version.
-    version = '.'.join(__version__.split('.')[:2])
-    # The full version, including alpha/beta/rc tags.
-    release = __version__
-except ImportError:
-    version = release = 'dev'
+# The full version, including alpha/beta/rc tags
+release = get_version()
+# The short X.Y version
+version = '.'.join(release.split('.')[:3])
 
 # -- General configuration ------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -62,31 +67,31 @@ htmlhelp_basename = 'django-constancedoc'
 latex_elements = {}
 
 latex_documents = [
-  ('index', 'django-constance.tex', 'django-constance Documentation',
-   'Jazzband', 'manual'),
+    ('index', 'django-constance.tex', 'django-constance Documentation', 'Jazzband', 'manual'),
 ]
 
 # -- Options for manual page output ---------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-manual-page-output
 
-man_pages = [
-    ('index', 'django-constance', 'django-constance Documentation',
-     ['Jazzband'], 1)
-]
+man_pages = [('index', 'django-constance', 'django-constance Documentation', ['Jazzband'], 1)]
 
 # -- Options for Texinfo output -------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-texinfo-output
 
 texinfo_documents = [
-  ('index', 'django-constance', 'django-constance Documentation',
-   'Jazzband', 'django-constance', 'One line description of project.',
-   'Miscellaneous'),
+    (
+        'index',
+        'django-constance',
+        'django-constance Documentation',
+        'Jazzband',
+        'django-constance',
+        'One line description of project.',
+        'Miscellaneous',
+    ),
 ]
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3', None),
-    'django': ('https://docs.djangoproject.com/en/dev/',
-               'https://docs.djangoproject.com/en/dev/_objects/'),
+    'django': ('https://docs.djangoproject.com/en/dev/', 'https://docs.djangoproject.com/en/dev/_objects/'),
 }
-
